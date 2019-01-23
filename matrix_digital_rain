@@ -1,0 +1,142 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
+package MatrixThread;
+use Curses;
+use Class::Tiny qw(w h cs col iter);
+# Attributes:
+#   - w:    width of the screen at construction time
+#   - h:    height of the screen at construction time
+#   - cs:   characters
+#   - col:  column of the thread
+#   - iter: current iteration of the thread's life
+
+sub BUILD ($s, $args) {
+
+    # Set window dimensions
+    $s->w(getmaxx);
+    $s->h(getmaxy);
+
+    # Prepare characters for automatic generation
+    my @chars = (
+       'A' .. 'Z',
+        0  ..  9,
+        split // => '<>^°!"§$%&/{([)]=}?`+*#-_.:,;'
+    );
+
+    # Generate
+    $s->cs(join '' => map $chars[rand @chars] =>
+        1 .. 1 + $s->h/2 + rand($s->h/2)
+    );
+
+    # Decide where to draw it
+    $s->col(int rand $s->w);
+
+    # Initial generation
+    $s->iter(0 - rand $s->h / 2);
+}
+
+# Single character accessor
+sub get_char ($s, $i) {
+    return substr($s->cs, $i, 1);
+}
+
+# State tests
+sub pre    ($s) {$s->iter <     0}
+sub fresh  ($s) {$s->iter >=    0              and $s->iter <     length $s->cs}
+sub drawn  ($s) {$s->iter >=     length $s->cs and $s->iter < 2 * length $s->cs}
+sub waited ($s) {$s->iter >= 2 * length $s->cs and $s->iter < 3 * length $s->cs}
+sub gone   ($s) {$s->iter >= 3 * length $s->cs}
+
+# Let the thread draw itself
+sub draw_iteration ($s) {
+    my $len = length $s->cs;
+    my $row = $s->iter % length $s->cs;
+
+    # Decide what to do depending on the current iteration
+
+    # Do nothing if not started yet
+    if ($s->pre) {
+        # Wait
+    }
+
+    # Draw chars
+    elsif ($s->fresh) {
+
+        # Draw current character
+        attrset(COLOR_PAIR(1));
+        addch($row, $s->col, $s->get_char($row));
+
+        # Dim last character
+        if ($row > 0) {
+            my $r = $row - 1;
+            attrset(COLOR_PAIR(2));
+            addch($r, $s->col, $s->get_char($r));
+        }
+    }
+
+    # De-highlight the last char
+    elsif ($s->iter == $len) {
+        attrset(COLOR_PAIR(2));
+        addch($len, $s->col, $s->get_char($#{$s->cs}));
+    }
+
+    # Pause
+    elsif ($s->drawn) {
+        # Wait
+    }
+
+    # Erase
+    elsif ($s->waited) {
+        addch($row, $s->col, ' ');
+    }
+
+    # Done
+    refresh;
+    $s->iter($s->iter + 1);
+}
+
+package main;
+use Curses;
+use Time::HiRes 'usleep';
+
+# Shutdown gracefully
+END { endwin() }
+
+# Initialize curses screen
+initscr;
+curs_set(0);
+use_default_colors;
+start_color;
+init_pair(1, COLOR_WHITE, COLOR_BLACK);
+init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
+# Initialize $available_width / 4 threads
+my @threadpool  = map MatrixThread->new => 1 .. getmaxx() / 3;
+my $threadcount = @threadpool;
+
+# Draw loop
+while (1) {
+
+    # Let each thread draw itself
+    $_->draw_iteration for @threadpool;
+
+    # Remove threads that have been erased already
+    @threadpool = grep not($_->gone) => @threadpool;
+
+    # Create new threads when old ones are drawn
+    push @threadpool, MatrixThread->new
+        for 1 .. $threadcount - @threadpool;
+
+    # Wait a little bit (microseconds)
+    usleep 80_000;
+}
+
+# Done: clear the screen
+clear;
+
+__END__
