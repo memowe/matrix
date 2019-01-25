@@ -47,7 +47,6 @@ sub get_char ($s, $i) {
 
 # State tests
 sub len    ($s) {length $s->cs}
-sub pre    ($s) {$s->iter <  0}
 sub fresh  ($s) {$s->iter >= 0           and $s->iter <     $s->len}
 sub drawn  ($s) {$s->iter >=     $s->len and $s->iter < 2 * $s->len}
 sub waited ($s) {$s->iter >= 2 * $s->len and $s->iter < 3 * $s->len}
@@ -59,13 +58,8 @@ sub draw_iteration ($s) {
 
     # Decide what to do depending on the current iteration
 
-    # Do nothing if not started yet
-    if ($s->pre) {
-        # Wait
-    }
-
     # Draw chars
-    elsif ($s->fresh) {
+    if ($s->fresh) {
 
         # Draw current character
         attrset(COLOR_PAIR(1));
