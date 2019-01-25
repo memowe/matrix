@@ -19,19 +19,15 @@ Just a small curses finger exercise.
 
 Use your standard perl module installation procedures (e. g. [cpanm][cpanm]) or the classic
 
-```bash
-$ perl Makefile.PL
-$ make
-$ make install
-```
+    $ perl Makefile.PL
+    $ make
+    $ make install
 
 [cpanm]: https://metacpan.org/pod/App::cpanminus
 
 ## Run it
 
-```bash
-$ matrix_digital_rain
-```
+    $ matrix_digital_rain
 
 Kill it with <kbd>Ctrl</kbd>+<kbd>C</kbd>.
 
