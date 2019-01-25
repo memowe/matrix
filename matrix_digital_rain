@@ -73,15 +73,10 @@ sub draw_iteration ($s) {
         }
     }
 
-    # De-highlight the last char
-    elsif ($s->iter == $s->len) {
+    # De-highlight the last char when done drawing
+    elsif ($s->drawn and $row == 0) {
         attrset(COLOR_PAIR(2));
-        addch($s->len, $s->col, $s->get_char($#{$s->cs}));
-    }
-
-    # Pause
-    elsif ($s->drawn) {
-        # Wait
+        addch($s->len - 1, $s->col, $s->get_char($s->len - 1));
     }
 
     # Erase
