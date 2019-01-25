@@ -3,6 +3,8 @@
 
 Just a small curses finger exercise.
 
+![](matrixcast.gif)
+
 ## Requirements
 
 - [Perl][perl] 5.20
