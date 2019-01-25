@@ -46,16 +46,16 @@ sub get_char ($s, $i) {
 }
 
 # State tests
-sub pre    ($s) {$s->iter <     0}
-sub fresh  ($s) {$s->iter >=    0              and $s->iter <     length $s->cs}
-sub drawn  ($s) {$s->iter >=     length $s->cs and $s->iter < 2 * length $s->cs}
-sub waited ($s) {$s->iter >= 2 * length $s->cs and $s->iter < 3 * length $s->cs}
-sub gone   ($s) {$s->iter >= 3 * length $s->cs}
+sub len    ($s) {length $s->cs}
+sub pre    ($s) {$s->iter <  0}
+sub fresh  ($s) {$s->iter >= 0           and $s->iter <     $s->len}
+sub drawn  ($s) {$s->iter >=     $s->len and $s->iter < 2 * $s->len}
+sub waited ($s) {$s->iter >= 2 * $s->len and $s->iter < 3 * $s->len}
+sub gone   ($s) {$s->iter >= 3 * $s->len}
 
 # Let the thread draw itself
 sub draw_iteration ($s) {
-    my $len = length $s->cs;
-    my $row = $s->iter % length $s->cs;
+    my $row = $s->iter % $s->len;
 
     # Decide what to do depending on the current iteration
 
@@ -80,9 +80,9 @@ sub draw_iteration ($s) {
     }
 
     # De-highlight the last char
-    elsif ($s->iter == $len) {
+    elsif ($s->iter == $s->len) {
         attrset(COLOR_PAIR(2));
-        addch($len, $s->col, $s->get_char($#{$s->cs}));
+        addch($s->len, $s->col, $s->get_char($#{$s->cs}));
     }
 
     # Pause
