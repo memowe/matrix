@@ -15,6 +15,10 @@ use Class::Tiny qw(w h cs col iter);
 #   - col:  column of the thread
 #   - iter: current iteration of the thread's life
 
+# re characters: https://scifi.stackexchange.com/a/182823 says
+# 日ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ012345789Z:・."=*+-<>¦｜çﾘｸ二コソヤ
+# but that's not possible in plain curses
+
 sub BUILD ($s, $args) {
 
     # Set window dimensions
