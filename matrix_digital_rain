@@ -66,13 +66,13 @@ sub draw_iteration ($s) {
     if ($s->fresh) {
 
         # Draw current character
-        attrset(COLOR_PAIR(1));
+        attrset(COLOR_PAIR(1) | A_BOLD);
         addch($row, $s->col, $s->get_char($row));
 
         # Dim last character
         if ($row > 0) {
             my $r = $row - 1;
-            attrset(COLOR_PAIR(2));
+            attrset(COLOR_PAIR(2) | A_NORMAL);
             addch($r, $s->col, $s->get_char($r));
         }
     }
